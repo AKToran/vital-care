@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from .import models
 from django.contrib.auth.models import User
-from . serializers import PatientSerializer, RegistrationSerializer
+from . serializers import PatientSerializer, RegistrationSerializer, LoginSerializer
 from rest_framework.response import Response
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -10,6 +10,8 @@ from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import redirect
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 
 class PatientViewset(viewsets.ModelViewSet):
     queryset = models.Patient.objects.all()
@@ -44,8 +46,23 @@ def activate(request, uid64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        return redirect('register')
+        return redirect('login')
     else:
         return redirect('register')
     
+class LoginApiView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=self.request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+
+            user = authenticate(username=username, password=password)
+            if user:
+                token, _ = Token.objects.get_or_create(user=user)
+                return Response({'token': token.key, 'user_id': user.id})
+                #! gives error: Object of type Token is not JSON serializable IF SENDING TOKEN. token.key fixes it.
+            else:
+                return Response({'error': 'Invalid username or password!'})
+        return Response(serializer.errors)
 
