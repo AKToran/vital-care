@@ -6,5 +6,6 @@ router = DefaultRouter()
 router.register('list', views.PatientViewset)
 urlpatterns = [ 
     path('', include(router.urls)),
-    path('register/', views.RegistrationApiView.as_view(), name='register')
+    path('register/', views.RegistrationApiView.as_view(), name='register'),
+    path('activate/<uid64>/<token>/', views.activate, name='activate'), 
 ]
