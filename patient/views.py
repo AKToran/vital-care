@@ -10,7 +10,7 @@ from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import redirect
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 
 class PatientViewset(viewsets.ModelViewSet):
@@ -60,9 +60,17 @@ class LoginApiView(APIView):
             user = authenticate(username=username, password=password)
             if user:
                 token, _ = Token.objects.get_or_create(user=user)
+                login(request, user)
                 return Response({'token': token.key, 'user_id': user.id})
                 #! gives error: Object of type Token is not JSON serializable IF SENDING TOKEN. token.key fixes it.
             else:
                 return Response({'error': 'Invalid username or password!'})
         return Response(serializer.errors)
+
+class LogoutApiView(APIView):
+    def get(self, request):
+        request.user.auth_token.delete()
+        logout(request)
+        return redirect('login')
+    
 
