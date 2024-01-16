@@ -1,0 +1,14 @@
+{
+    "builds": [
+      {
+        "src": "vital_care/wsgi.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "vital_care/wsgi.py"
+      }
+    ]
+}
