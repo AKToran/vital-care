@@ -30,6 +30,7 @@ SECRET_KEY = 'django-insecure-vlw83_z-5n3e-qb(*m74(k-!z1h686wo(fbmusibehlzy9d%)@
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = ['https://vitalcare.onrender.com']
 
 
 
